@@ -1,15 +1,17 @@
 package net.sophomatics.matrix;
 
-import junit.framework.TestCase;
 import net.sophomatics.util.Timer;
 
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by mark on 12.07.15.
  */
-public class MatrixTest extends TestCase {
+public class MatrixTest {
     private static final Random r = new Random(7331);
+    private final static Logger logger = Logger.getLogger(MatrixTest.class.getSimpleName());
 
     private static int[] getRandomArray(int size) {
         int totalIterations = size * size;
@@ -43,7 +45,9 @@ public class MatrixTest extends TestCase {
             for (int y = 0; y < size; y++) {
                 value = matrix.get(x, y);
                 expected = randomArray[x * size + y];
-                assertEquals(value, expected);
+                if (value != expected) {
+                    logger.log(Level.SEVERE, String.format("Found %s, expected %s @(%s, %s)", value, expected, x, y));
+                };
                 t.tick();
             }
         }

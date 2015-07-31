@@ -6,11 +6,14 @@ import net.sophomatics.markov_predictor.MarkovPredictorFactory;
 import net.sophomatics.util.Tuple;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by mark on 12.07.15.
  */
 public class Hierarchy<Sensor, Motor> {
+    private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
     private final MarkovPredictorFactory<Tuple<Sensor, Motor>, Sensor> mFak;
     private final Set<MarkovPredictor<Tuple<Sensor, Motor>, Sensor>> models;
     private final MarkovPredictor<Tuple<Sensor, Motor>, Sensor> tempModel;
@@ -162,7 +165,7 @@ public class Hierarchy<Sensor, Motor> {
         if (!this.currentModel.isKnown(cause)) {
             return s;
         }
-        int i = 1 / 0;
+        logger.log(Level.WARNING, String.format("%s is unknown.", cause));
         return this.currentModel.getConsequence(cause);
     }
 

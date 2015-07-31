@@ -1,15 +1,16 @@
 package net.sophomatics.markov_predictor;
 
-import junit.framework.TestCase;
 import net.sophomatics.util.Timer;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * Created by mark on 12.07.15.
  */
-public class MarkovPredictorTest extends TestCase {
+public class MarkovPredictorTest {
     private final static Random r = new Random(3771);
+    private final static Logger logger = Logger.getLogger(MarkovPredictorTest.class.getSimpleName());
 
     private static char[] getRandomArray(int size) {
         char[] randomArray = new char[size];
