@@ -6,11 +6,15 @@ import net.sophomatics.markov_predictor.MarkovPredictorFactory;
 import net.sophomatics.util.Tuple;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by mark on 12.07.15.
+ * Recursive hierarchy class
+ *
+ * @author mark
+ * @version 1.0
+ * @since 2015-08-05
+ *
  */
 public class Hierarchy<Sensor, Motor> {
     private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
@@ -110,25 +114,19 @@ public class Hierarchy<Sensor, Motor> {
         return bestModel;
     }
 
-    private float getjointLikelihood(Tuple<Sensor, Motor> cause, Sensor effect) {
-        if (!(this.tempModel.isKnown(cause) || this.currentModel.isKnown(cause))) {
-            return 1f;
-        }
-
-        int joint = this.tempModel.getFrequency(cause, effect) + this.currentModel.getFrequency(cause, effect);
-        int sum = this.tempModel.getMass(cause) + this.currentModel.getMass(cause);
-
-        return (float) joint / sum;
-    }
     private float getLikelihood(Tuple<Sensor, Motor> cause, Sensor effect) {
         return this.tempModel.getProbability(cause, effect);
     }
 
+    private float getJointLikelihood(Tuple<Sensor, Motor> cause, Sensor effect) {
+        return (this.tempModel.getProbability(cause, effect) + this.currentModel.getProbability(cause, effect)) / 2;
+    }
+
     public void observe(Sensor s0, Motor m, Sensor s1) {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m);
-        //if (this.tempModel.isKnown(cause)) {
         if (this.getLikelihood(cause, s1) < this.threshold) {
-            MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
+        //if (this.getJointLikelihood(cause, s1) < this.threshold) {
+                MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
 
             if (this.parent == null) {
                 bestModel = this.currentModel;
@@ -161,12 +159,29 @@ public class Hierarchy<Sensor, Motor> {
     }
 
     public Sensor predict(Sensor s, Motor m) {
-        Tuple<Sensor, Motor> cause = new Tuple<>(s, m);
-        if (!this.currentModel.isKnown(cause)) {
+        Tuple<Sensor, Motor> t = new Tuple<>(s, m);
+        Set<Sensor> allCons = this.currentModel.getAllConsequences();
+        allCons.addAll(this.tempModel.getAllConsequences());
+
+        if (allCons.size() < 1) {
             return s;
         }
-        logger.log(Level.WARNING, String.format("%s is unknown.", cause));
-        return this.currentModel.getConsequence(cause);
+
+        List<Sensor> bestCons = new ArrayList<>();
+        double thisValue, maxValue = -1d;
+
+        for (Sensor s1 : allCons) {
+            thisValue = this.currentModel.getProbability(t, s1) + this.tempModel.getProbability(t, s1);
+            if (maxValue < thisValue) {
+                bestCons.clear();
+                bestCons.add(s1);
+                maxValue = thisValue;
+            } else if (maxValue == thisValue) {
+                bestCons.add(s1);
+            }
+        }
+
+        return bestCons.get(0);
     }
 
     public Motor interact(Sensor s) {

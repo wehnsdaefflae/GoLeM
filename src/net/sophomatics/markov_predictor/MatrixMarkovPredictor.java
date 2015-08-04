@@ -1,29 +1,27 @@
 package net.sophomatics.markov_predictor;
 
-import net.sophomatics.matrix.NestedMapMatrix;
 import net.sophomatics.matrix.Matrix;
+import net.sophomatics.matrix.NestedMapMatrix;
 import net.sophomatics.util.Identifiable;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by mark on 12.07.15.
+ * Implementation of a Markov predictor
+ *
+ * @author mark
+ * @version 1.0
+ * @since 2015-08-05
+ *
  */
 public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable implements MarkovPredictor<Condition, Consequence> {
     private final Matrix<Condition, Consequence, Integer> matrix;
-    private final Logger logger;
+    private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
     public MatrixMarkovPredictor(int id) {
         super(id);
         this.matrix = new NestedMapMatrix<>();
-        this.logger = Logger.getLogger(this.getClass().getSimpleName());
-    }
-
-    public MatrixMarkovPredictor(int id, MatrixMarkovPredictor<Condition, Consequence> other) {
-        this(id);
-        this.matrix.integrate(other.matrix);
     }
 
     @Override
@@ -49,25 +47,6 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
         this.matrix.clear();
     }
 
-    @Override
-    public int getMass(Condition cause) {
-        int sum = 0;
-        for (int eachFrequency : this.matrix.getValues(cause)) {
-            sum += eachFrequency;
-        }
-        return sum;
-    }
-
-    @Override
-    public Set<Consequence> getEffects(Condition cause) {
-        return this.matrix.getKeys(cause);
-    }
-
-    @Override
-    public boolean isKnown(Condition cause) {
-        return this.matrix.containsKey(cause);
-    }
-
     public String print() {
         return this.toString() + "\n" + this.matrix.print();
     }
@@ -75,11 +54,6 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     @Override
     public String toString() {
         return String.format("%s%s", this.getClass().getSimpleName(), this.getId());
-    }
-
-    @Override
-    public boolean containsCondition(Condition cause) {
-        return this.matrix.get(cause) != null;
     }
 
     @Override
@@ -92,6 +66,15 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     @Override
+    public Set<Consequence> getAllConsequences() {
+        Set<Consequence> allCons = new HashSet<>();
+        for (Condition eachCondition : this.matrix.keySet()) {
+            allCons.addAll(this.matrix.getKeys(eachCondition));
+        }
+        return allCons;
+    }
+
+    @Override
     public void store(Condition cause, Consequence effect) {
         this.matrix.put(cause, effect, this.getFrequency(cause, effect) + 1);
     }
@@ -100,9 +83,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     public Consequence getConsequence(Condition cause) {
         Map<Consequence, Integer> row = this.matrix.get(cause);
         if (row == null) {
-            String message = String.format("<%s> has no consequence yet.", cause);
-            this.logger.log(Level.SEVERE, message);
-            throw new NullPointerException();
+            return null;
         }
 
         List<Consequence> nextList = new ArrayList<>();
@@ -131,8 +112,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
         Consequence otherEffect;
         Map<Consequence, Integer> otherRow;
         Map<Consequence, Integer> thisRow;
-        float sum;
-        Integer thisFrequency;
+        Integer thisFrequency, sum;
 
         for (Map.Entry<Condition, Map<Consequence, Integer>> otherEntry : cast.matrix.entrySet()) {
             otherCause = otherEntry.getKey();
@@ -151,7 +131,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
                 if (thisFrequency == null || thisFrequency < 1) {
                     return 0f;
                 }
-                similarity *= Math.pow(thisFrequency / sum, otherSubEntry.getValue());
+                similarity *= Math.pow((float) thisFrequency / sum, otherSubEntry.getValue());
             }
         }
 

@@ -3,10 +3,17 @@ package net.sophomatics.markov_predictor;
 import java.util.Set;
 
 /**
- * Created by mark on 12.07.15.
+ * Interface for a Markov predictor
+ *
+ * @author mark
+ * @version 1.0
+ * @since 2015-08-05
+ *
  */
 public interface MarkovPredictor<Condition, Consequence> {
     int getFrequency(Condition cause, Consequence effect);
+
+    Set<Consequence> getAllConsequences();
 
     float getProbability(Condition cause, Consequence effect);
 
@@ -20,19 +27,11 @@ public interface MarkovPredictor<Condition, Consequence> {
 
     String print();
 
-    boolean containsCondition(Condition cause);
-
     int hashCode();
 
     boolean equals(Object other);
 
     void clear();
-
-    int getMass(Condition cause);
-
-    Set<Consequence> getEffects(Condition cause);
-
-    boolean isKnown(Condition cause);
 
     int getId();
 }
