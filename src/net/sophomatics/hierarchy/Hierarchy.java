@@ -118,15 +118,17 @@ public class Hierarchy<Sensor, Motor> {
         return this.tempModel.getProbability(cause, effect);
     }
 
-    private float getJointLikelihood(Tuple<Sensor, Motor> cause, Sensor effect) {
-        return (this.tempModel.getProbability(cause, effect) + this.currentModel.getProbability(cause, effect)) / 2;
+    private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
+        int maxFreq = this.tempModel.getHighestFrequency(cause) + this.currentModel.getHighestFrequency(cause);
+        int totalFreq = this.tempModel.getFrequency(cause, effect) + this.currentModel.getFrequency(cause, effect);
+        return maxFreq < totalFreq;
     }
 
     public void observe(Sensor s0, Motor m, Sensor s1) {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m);
         if (this.getLikelihood(cause, s1) < this.threshold) {
-        //if (this.getJointLikelihood(cause, s1) < this.threshold) {
-                MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
+        //if (this.isBreakdown(cause, s1)) {
+            MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
 
             if (this.parent == null) {
                 bestModel = this.currentModel;

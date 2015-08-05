@@ -19,7 +19,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     private final Matrix<Condition, Consequence, Integer> matrix;
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
-    public MatrixMarkovPredictor(int id) {
+    public MatrixMarkovPredictor(int id, boolean isOpenWorld) {
         super(id);
         this.matrix = new NestedMapMatrix<>();
     }
@@ -63,6 +63,35 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             return 0;
         }
         return f;
+    }
+
+    @Override
+    public int getHighestFrequency(Condition cause) {
+        Map<Consequence, Integer> subMap = this.matrix.get(cause);
+        if (subMap == null) {
+            return 0;
+        }
+
+        int maxFreq = -1;
+        for (int eachFreq : subMap.values()) {
+            if (maxFreq < eachFreq) {
+                maxFreq = eachFreq;
+            }
+        }
+        return maxFreq;
+    }
+
+    @Override
+    public int getMass(Condition cause) {
+        Map<Consequence, Integer> subMap = this.matrix.get(cause);
+        if (subMap == null) {
+            return 0;
+        }
+        int mass = 0;
+        for (int eachFreq : subMap.values()) {
+            mass += eachFreq;
+        }
+        return mass;
     }
 
     @Override
@@ -120,10 +149,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             if (thisRow == null) {
                 continue;
             }
-            sum = 0;
-            for (Integer eachFreq : thisRow.values()) {
-                sum += eachFreq;
-            }
+            sum = this.getMass(otherCause);
             otherRow = otherEntry.getValue();
             for (Map.Entry<Consequence, Integer> otherSubEntry : otherRow.entrySet()) {
                 otherEffect = otherSubEntry.getKey();
@@ -166,22 +192,12 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
 
     @Override
     public float getProbability(Condition cause, Consequence effect) {
-        Map<Consequence, Integer> row = this.matrix.get(cause);
-        if (row == null) {
+        int mass = this.getMass(cause);
+        if (mass < 1) {
             return 1f;
         }
 
-        Integer f = row.get(effect);
-        if (f == null) {
-            return 0f;
-        }
-
-        int sum = 0;
-        for (int eachF : row.values()) {
-            sum += eachF;
-        }
-
-        return (float) f / sum;
+        return (float) this.getFrequency(cause, effect) / mass;
     }
 
 }

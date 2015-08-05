@@ -13,6 +13,10 @@ import java.util.Set;
 public interface MarkovPredictor<Condition, Consequence> {
     int getFrequency(Condition cause, Consequence effect);
 
+    int getHighestFrequency(Condition cause);
+
+    int getMass(Condition cause);
+
     Set<Consequence> getAllConsequences();
 
     float getProbability(Condition cause, Consequence effect);
