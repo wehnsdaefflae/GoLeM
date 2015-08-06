@@ -114,20 +114,17 @@ public class Hierarchy<Sensor, Motor> {
         return bestModel;
     }
 
-    private float getLikelihood(Tuple<Sensor, Motor> cause, Sensor effect) {
-        return this.tempModel.getProbability(cause, effect);
-    }
-
     private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
-        int maxFreq = this.tempModel.getHighestFrequency(cause) + this.currentModel.getHighestFrequency(cause);
-        int totalFreq = this.tempModel.getFrequency(cause, effect) + this.currentModel.getFrequency(cause, effect);
-        return maxFreq < totalFreq;
+        int bestFreq = this.tempModel.getHighestFrequency(cause);
+        bestFreq += this.currentModel.getHighestFrequency(cause);
+        int thisFreq = this.tempModel.getFrequency(cause, effect);
+        thisFreq += this.currentModel.getFrequency(cause, effect);
+        return thisFreq < bestFreq;
     }
 
     public void observe(Sensor s0, Motor m, Sensor s1) {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m);
-        if (this.getLikelihood(cause, s1) < this.threshold) {
-        //if (this.isBreakdown(cause, s1)) {
+        if (this.isBreakdown(cause, s1)) {
             MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
 
             if (this.parent == null) {
@@ -138,7 +135,9 @@ public class Hierarchy<Sensor, Motor> {
                 bestModel = this.mFak.get(bestId);
             }
 
-            if (this.tempModel.getSimilarity(bestModel) < this.threshold) {
+            float sim = this.tempModel.getSimilarity(bestModel);
+
+            if (sim < this.threshold) {
                 bestModel = this.findModel();
             }
 
