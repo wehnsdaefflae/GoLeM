@@ -18,8 +18,8 @@ public class Main {
         char[] prediction = new char[textArray.length * repetitions];
         for (int r = 0; r < repetitions; r++) {
             for (int i = 0; i < textArray.length; i++) {
-                h.observe(textArray[i % textArray.length], null, textArray[(i + 1) % textArray.length]);
-                prediction[i + textArray.length * r] = h.predict(textArray[i % textArray.length], null);
+                h.stimulate(textArray[i % textArray.length], null, textArray[(i + 1) % textArray.length]);
+                prediction[i + textArray.length * r] = h.predict();
             }
         }
 

@@ -4,8 +4,6 @@ import net.sophomatics.markov_predictor.MarkovPredictor;
 import net.sophomatics.markov_predictor.MarkovPredictorFactory;
 import net.sophomatics.util.Tuple;
 
-import java.util.Random;
-
 /**
  * Testing class
  *
@@ -16,18 +14,15 @@ import java.util.Random;
  */
 public class Exec {
     public static void main(String[] args) {
-        Random r = new Random(3771);
         MarkovPredictorFactory<Tuple<Integer, Void>, Integer> mFak = new MarkovPredictorFactory<>();
 
         MarkovPredictor<Tuple<Integer, Void>, Integer> mp0 = mFak.newInstance();
-        for (int i = 0; i < 10; i++) {
-            mp0.store(new Tuple<Integer, Void>(r.nextInt(3), null), r.nextInt(3));
-        }
+        mp0.store(new Tuple<Integer, Void>(0, null), 1);
 
         MarkovPredictor<Tuple<Integer, Void>, Integer> mp1 = mFak.newInstance();
-        for (int i = 0; i < 2; i++) {
-            mp1.store(new Tuple<Integer, Void>(r.nextInt(3), null), r.nextInt(3));
-        }
+        mp1.store(new Tuple<Integer, Void>(0, null), 1);
+        mp1.store(new Tuple<Integer, Void>(0, null), 2);
+        mp1.store(new Tuple<Integer, Void>(0, null), 2);
 
         System.out.println(mp0.print());
         System.out.println();

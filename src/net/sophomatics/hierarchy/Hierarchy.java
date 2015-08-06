@@ -28,6 +28,7 @@ public class Hierarchy<Sensor, Motor> {
     private Hierarchy<Integer, Tuple<Sensor, Motor>> parent;
 
     private Tuple<Sensor, Motor> lastCause;
+    private Tuple<Sensor, Motor> nextCause;
     private final float threshold;
     public final int level;
 
@@ -122,8 +123,8 @@ public class Hierarchy<Sensor, Motor> {
         return thisFreq < bestFreq;
     }
 
-    public void observe(Sensor s0, Motor m, Sensor s1) {
-        Tuple<Sensor, Motor> cause = new Tuple<>(s0, m);
+    public Motor stimulate(Sensor s0, Motor m0, Sensor s1) {
+        Tuple<Sensor, Motor> cause = new Tuple<>(s0, m0);
         if (this.isBreakdown(cause, s1)) {
             MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
 
@@ -131,12 +132,11 @@ public class Hierarchy<Sensor, Motor> {
                 bestModel = this.currentModel;
 
             } else {
-                int bestId = this.parent.predict(this.currentModel.getId(), cause);
+                int bestId = this.parent.predict();
                 bestModel = this.mFak.get(bestId);
             }
 
             float sim = bestModel.getMatch(this.tempModel);
-
             if (sim < this.threshold) {
                 bestModel = this.findModel();
             }
@@ -145,34 +145,38 @@ public class Hierarchy<Sensor, Motor> {
             this.tempModel.clear();
 
             if (this.parent != null) {
-                if (!(this.lastModel == null || this.lastCause == null)) {
-                    this.parent.observe(this.lastModel.getId(), this.lastCause, bestModel.getId());
+                if (this.lastModel != null && this.lastCause != null) {
+                    nextCause = this.parent.stimulate(this.lastModel.getId(), this.lastCause, bestModel.getId());
+                    int newId = this.parent.predict();
+                    this.currentModel = this.mFak.get(newId);
                 }
-
-                int newId = this.parent.predict(bestModel.getId(), cause);
-                this.currentModel = this.mFak.get(newId);
             }
             this.lastModel = bestModel;
             this.lastCause = cause;
         }
 
         this.tempModel.store(cause, s1);
+
+        Motor m1 = this.interact(s1);
+
+        // choose between this nextCause and the nextCause from parent
+        this.nextCause = new Tuple<>(s1, m1);
+        return m1;
     }
 
-    public Sensor predict(Sensor s, Motor m) {
-        Tuple<Sensor, Motor> t = new Tuple<>(s, m);
+    public Sensor predict() {
         Set<Sensor> allCons = this.currentModel.getAllConsequences();
         allCons.addAll(this.tempModel.getAllConsequences());
 
         if (allCons.size() < 1) {
-            return s;
+            return nextCause.a;
         }
 
         List<Sensor> bestCons = new ArrayList<>();
         double thisValue, maxValue = -1d;
 
         for (Sensor s1 : allCons) {
-            thisValue = this.currentModel.getFrequency(t, s1) + this.tempModel.getFrequency(t, s1);
+            thisValue = this.currentModel.getFrequency(nextCause, s1) + this.tempModel.getFrequency(nextCause, s1);
             if (maxValue < thisValue) {
                 bestCons.clear();
                 bestCons.add(s1);
@@ -185,7 +189,7 @@ public class Hierarchy<Sensor, Motor> {
         return bestCons.get(0);
     }
 
-    public Motor interact(Sensor s) {
+    private Motor interact(Sensor s) {
         return null;
     }
 
