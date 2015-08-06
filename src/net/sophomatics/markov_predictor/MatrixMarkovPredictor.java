@@ -19,7 +19,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     private final Matrix<Condition, Consequence, Integer> matrix;
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
-    public MatrixMarkovPredictor(int id, boolean isOpenWorld) {
+    public MatrixMarkovPredictor(int id) {
         super(id);
         this.matrix = new NestedMapMatrix<>();
     }

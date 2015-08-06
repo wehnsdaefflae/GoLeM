@@ -21,7 +21,7 @@ public class MarkovPredictorFactory<Condition, Consequence> implements Iterable<
 
     public MarkovPredictor<Condition, Consequence> newInstance() {
         int newId = this.products.size();
-        MarkovPredictor<Condition, Consequence> newProduct = new MatrixMarkovPredictor<>(newId, true);
+        MarkovPredictor<Condition, Consequence> newProduct = new MatrixMarkovPredictor<>(newId);
         this.products.add(newProduct);
         return newProduct;
     }
