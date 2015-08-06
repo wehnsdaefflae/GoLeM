@@ -66,7 +66,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     @Override
-    public int getHighestFrequency(Condition cause) {
+    public int getMaxFrequency(Condition cause) {
         Map<Consequence, Integer> subMap = this.matrix.get(cause);
         if (subMap == null) {
             return 0;

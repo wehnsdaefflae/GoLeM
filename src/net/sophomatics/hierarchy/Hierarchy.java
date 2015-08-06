@@ -115,10 +115,10 @@ public class Hierarchy<Sensor, Motor> {
     }
 
     private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
-        int bestFreq = this.tempModel.getHighestFrequency(cause);
-        bestFreq += this.currentModel.getHighestFrequency(cause);
+        int bestFreq = this.tempModel.getMaxFrequency(cause);
         int thisFreq = this.tempModel.getFrequency(cause, effect);
-        thisFreq += this.currentModel.getFrequency(cause, effect);
+        //bestFreq += this.currentModel.getMaxFrequency(cause);
+        //thisFreq += this.currentModel.getFrequency(cause, effect);
         return thisFreq < bestFreq;
     }
 
@@ -172,7 +172,7 @@ public class Hierarchy<Sensor, Motor> {
         double thisValue, maxValue = -1d;
 
         for (Sensor s1 : allCons) {
-            thisValue = this.currentModel.getProbability(t, s1) + this.tempModel.getProbability(t, s1);
+            thisValue = this.currentModel.getFrequency(t, s1) + this.tempModel.getFrequency(t, s1);
             if (maxValue < thisValue) {
                 bestCons.clear();
                 bestCons.add(s1);

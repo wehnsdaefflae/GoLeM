@@ -13,7 +13,7 @@ import java.util.Set;
 public interface MarkovPredictor<Condition, Consequence> {
     int getFrequency(Condition cause, Consequence effect);
 
-    int getHighestFrequency(Condition cause);
+    int getMaxFrequency(Condition cause);
 
     int getMass(Condition cause);
 
