@@ -88,7 +88,7 @@ public class Hierarchy<Sensor, Motor> {
         List<MarkovPredictor<Tuple<Sensor, Motor>, Sensor>> bestModelList = new ArrayList<>();
 
         for (MarkovPredictor<Tuple<Sensor, Motor>, Sensor> eachModel : this.models) {
-            thisValue = this.tempModel.getSimilarity(eachModel);
+            thisValue = eachModel.getMatch(this.tempModel);
 
             if (bestValue < thisValue) {
                 bestModelList.clear();
@@ -135,7 +135,7 @@ public class Hierarchy<Sensor, Motor> {
                 bestModel = this.mFak.get(bestId);
             }
 
-            float sim = this.tempModel.getSimilarity(bestModel);
+            float sim = bestModel.getMatch(this.tempModel);
 
             if (sim < this.threshold) {
                 bestModel = this.findModel();

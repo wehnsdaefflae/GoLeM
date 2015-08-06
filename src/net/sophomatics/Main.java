@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO: check for integers where there should be floats or doubles (.1f changes nothing)
-        Hierarchy<Character, Void> h = new Hierarchy<>(1f);
+        Hierarchy<Character, Void> h = new Hierarchy<>(.5f);
 
         String text = "peter piper picked a peck of pickled peppers a peck of pickled peppers peter piper picked if peter piper picked a peck of pickled peppers wheres the peck of pickled peppers peter piper picked ";
         char[] textArray = text.toCharArray();

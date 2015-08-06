@@ -133,7 +133,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     @Override
-    public float getSimilarity(MarkovPredictor<Condition, Consequence> other) {
+    public float getMatch(MarkovPredictor<Condition, Consequence> other) {
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
         float similarity = 1f;
 

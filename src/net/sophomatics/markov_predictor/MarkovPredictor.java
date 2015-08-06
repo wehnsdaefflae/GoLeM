@@ -25,7 +25,7 @@ public interface MarkovPredictor<Condition, Consequence> {
 
     Consequence getConsequence(Condition cause);
 
-    float getSimilarity(MarkovPredictor<Condition, Consequence> other);
+    float getMatch(MarkovPredictor<Condition, Consequence> other);
 
     void add(MarkovPredictor<Condition, Consequence> other);
 
