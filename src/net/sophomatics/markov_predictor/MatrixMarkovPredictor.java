@@ -3,6 +3,7 @@ package net.sophomatics.markov_predictor;
 import net.sophomatics.matrix.Matrix;
 import net.sophomatics.matrix.NestedMapMatrix;
 import net.sophomatics.util.Identifiable;
+import sun.management.Sensor;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -134,6 +135,35 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
 
     @Override
     public float getMatch(MarkovPredictor<Condition, Consequence> other) {
+        return this.getLikelihood(other);
+        //return this.getDeviationQuotient(other);
+    }
+
+    private float getExactDeviation(MarkovPredictor<Condition, Consequence> other) {
+        // TODO: deviation for each single cell
+        return 0f;
+    }
+
+    private float getDeviationQuotient(MarkovPredictor<Condition, Consequence> other) {
+        MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
+
+        int obsFreqSum = 0, maxFreqSum = 0;
+        Consequence effect;
+
+        for (Condition cause : cast.matrix.keySet()) {
+            effect = cast.getConsequence(cause);
+            obsFreqSum += this.getFrequency(cause, effect);
+            maxFreqSum += this.getMaxFrequency(cause);
+        }
+
+        if (maxFreqSum < 1) {
+            return 1f;
+        }
+
+        return (float) obsFreqSum / maxFreqSum;
+    }
+
+    private float getLikelihood(MarkovPredictor<Condition, Consequence> other) {
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
         float similarity = 1f;
 
@@ -161,6 +191,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             }
         }
 
+        //System.out.println(similarity);
         return similarity;
     }
 

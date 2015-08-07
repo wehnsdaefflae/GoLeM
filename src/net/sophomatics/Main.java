@@ -9,6 +9,7 @@ public class Main {
     public static void main(String[] args) {
         // TODO: check for integers where there should be floats or doubles (.1f changes nothing)
         Hierarchy<Character, Void> h = new Hierarchy<>(1f);
+        // using likelihood as MarkovPredictor.getMatch() causes perfect models, makes ]0, 1[ thresholds redundant
 
         String text = "peter piper picked a peck of pickled peppers a peck of pickled peppers peter piper picked if peter piper picked a peck of pickled peppers wheres the peck of pickled peppers peter piper picked ";
         char[] textArray = text.toCharArray();
@@ -18,8 +19,8 @@ public class Main {
         char[] prediction = new char[textArray.length * repetitions];
         for (int r = 0; r < repetitions; r++) {
             for (int i = 0; i < textArray.length; i++) {
-                h.stimulate(textArray[i % textArray.length], null, textArray[(i + 1) % textArray.length]);
-                prediction[i + textArray.length * r] = h.predict();
+                h.perceive(textArray[i % textArray.length], null, textArray[(i + 1) % textArray.length]);
+                prediction[i + textArray.length * r] = h.predict(textArray[i % textArray.length], null);
             }
         }
 
