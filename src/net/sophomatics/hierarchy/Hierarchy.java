@@ -118,8 +118,8 @@ public class Hierarchy<Sensor, Motor> {
     private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
         int bestFreq = this.tempModel.getMaxFrequency(cause);
         int thisFreq = this.tempModel.getFrequency(cause, effect);
-        bestFreq += this.currentModel.getMaxFrequency(cause);
-        thisFreq += this.currentModel.getFrequency(cause, effect);
+        //bestFreq += this.currentModel.getMaxFrequency(cause);
+        //thisFreq += this.currentModel.getFrequency(cause, effect);
         return thisFreq < bestFreq;
     }
 
@@ -178,8 +178,6 @@ public class Hierarchy<Sensor, Motor> {
             if (maxValue < thisValue) {
                 bestSensor = s1;
                 maxValue = thisValue;
-            } else if (maxValue == thisValue) {
-                bestSensor = s1;
             }
         }
 
