@@ -26,8 +26,8 @@ public class Main {
         int its = 10000;
         Timer t = new Timer(its, "");
         for (int i = 0; i < its; i++) {
-            isForward = r.nextBoolean();
-            //isForward = true;
+            //isForward = r.nextBoolean();
+            isForward = true;
             thisPos = (i + (isForward ? 1 : -1)) % textArray.length;
 
             thisChar = textArray[thisPos];

@@ -3,7 +3,6 @@ package net.sophomatics.markov_predictor;
 import net.sophomatics.matrix.Matrix;
 import net.sophomatics.matrix.NestedMapMatrix;
 import net.sophomatics.util.Identifiable;
-import sun.management.Sensor;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -135,13 +134,35 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
 
     @Override
     public float getMatch(MarkovPredictor<Condition, Consequence> other) {
+        //return this.getVectorDistance(other);
         return this.getLikelihood(other);
         //return this.getDeviationQuotient(other);
     }
 
-    private float getExactDeviation(MarkovPredictor<Condition, Consequence> other) {
-        // TODO: deviation for each single cell
-        return 0f;
+    private float getVectorDistance(MarkovPredictor<Condition, Consequence> other) {
+        MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
+
+        Set<Condition> causes = new HashSet<>(this.matrix.keySet());
+        causes.addAll(cast.matrix.keySet());
+
+        Set<Consequence> effects = new HashSet<>();
+
+        for (Condition eachCause : causes) {
+            effects.addAll(this.matrix.getKeys(eachCause));
+            effects.addAll(cast.matrix.getKeys(eachCause));
+        }
+
+        int size = causes.size() * effects.size();
+        double sum = 0d;
+        float difference;
+        for (Condition eachCause : causes) {
+            for (Consequence eachEffect : effects) {
+                difference = this.getProbability(eachCause, eachEffect) - cast.getProbability(eachCause, eachEffect);
+                sum += Math.pow(difference, 2);
+            }
+        }
+
+        return (float) (Math.sqrt(sum) / Math.sqrt(size));
     }
 
     private float getDeviationQuotient(MarkovPredictor<Condition, Consequence> other) {

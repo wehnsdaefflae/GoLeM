@@ -6,7 +6,12 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 /**
- * Created by mark on 12.07.15.
+ * Test class for Markov predictor
+ *
+ * @author mark
+ * @version 1.0
+ * @since 2015-08-05
+ *
  */
 public class MarkovPredictorTest {
     private final static Random r = new Random(3771);
@@ -24,29 +29,32 @@ public class MarkovPredictorTest {
     }
 
     public static void main(String[] args) {
-        Random r = new Random(3771);
+        int size = 10;
+        char[] randomArray0 = "peter".toCharArray();//getRandomArray(size);
+        char[] randomArray1 = "piper".toCharArray();//getRandomArray(size);
+
+        System.out.println(new String(randomArray0));
+        System.out.println(new String(randomArray1));
+        System.out.println();
+
         MarkovPredictorFactory<Character, Character> mFak = new MarkovPredictorFactory<>();
-        MarkovPredictor<Character, Character> mp = mFak.newInstance();
+        MarkovPredictor<Character, Character> mp0 = mFak.newInstance();
+        MarkovPredictor<Character, Character> mp1 = mFak.newInstance();
 
-        int size = 1000;
-        char[] randomArray = getRandomArray(size);
-
-        for (int i = 1; i < randomArray.length; i++) {
-            mp.store(randomArray[i-1], randomArray[i]);
+        for (int i = 1; i < randomArray0.length; i++) {
+            mp0.store(randomArray0[i-1], randomArray0[i]);
         }
 
-        char nextChar, lastChar= "e".charAt(0);
-        for (int i = 0; i < 20; i++) {
-            nextChar = mp.getConsequence(lastChar);
-            System.out.println(String.format("%s -> %s: %.2f, %s", lastChar, nextChar, mp.getProbability(lastChar, nextChar), mp.getFrequency(lastChar, nextChar)));
-            lastChar = nextChar;
+        for (int i = 1; i < randomArray1.length; i++) {
+            mp1.store(randomArray1[i - 1], randomArray1[i]);
         }
 
-        System.out.println(mp);
 
-        MarkovPredictor<Character, Character> mp2 = mFak.newInstance();
-        mp2.add(mp);
+        System.out.println(mp0.print());
+        System.out.println(mp1.print());
+        System.out.println();
 
-        System.out.println(mp2);
+        System.out.println(mp0.getMatch(mp1));
+        System.out.println(mp1.getMatch(mp0));
     }
 }
