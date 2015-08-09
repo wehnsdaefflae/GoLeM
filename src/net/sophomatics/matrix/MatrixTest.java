@@ -19,7 +19,7 @@ public class MatrixTest {
         int[] randomArray = new int[totalIterations];
         for (int i = 0; i < totalIterations; i++) {
             randomArray[i] = r.nextInt(10);
-            t.tick();
+            t.tick("");
         }
         t.finished();
         return randomArray;
@@ -31,7 +31,7 @@ public class MatrixTest {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 matrix.put(x, y, randomArray[x * size + y]);
-                t.tick();
+                t.tick("");
             }
         }
         t.finished();
@@ -47,8 +47,8 @@ public class MatrixTest {
                 expected = randomArray[x * size + y];
                 if (value != expected) {
                     logger.log(Level.SEVERE, String.format("Found %s, expected %s @(%s, %s)", value, expected, x, y));
-                };
-                t.tick();
+                }
+                t.tick("");
             }
         }
         t.finished();

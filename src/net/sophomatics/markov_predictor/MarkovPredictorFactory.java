@@ -30,6 +30,10 @@ public class MarkovPredictorFactory<Condition, Consequence> implements Iterable<
         return this.products.get(id);
     }
 
+    public List<MarkovPredictor<Condition, Consequence>> getProducts() {
+        return new ArrayList<>(this.products);
+    }
+
     @Override
     public Iterator<MarkovPredictor<Condition, Consequence>> iterator() {
         return this.products.iterator();

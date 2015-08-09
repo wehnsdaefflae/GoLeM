@@ -14,7 +14,7 @@ public class Main {
         // TODO: check for integers where there should be floats or doubles (.1f changes nothing)
         // using likelihood as MarkovPredictor.getMatch() causes perfect models, makes ]0, 1[ thresholds redundant
 
-        Hierarchy<Character, Boolean> h = new Hierarchy<>(1f);
+        Hierarchy<Character, Boolean> h = new Hierarchy<>(.5f);
 
         char[] prediction = new char[textArray.length];
 
@@ -23,11 +23,12 @@ public class Main {
         Character prevChar = null;
         int thisPos;
 
-        int its = 10000;
+        int its = 100000;
         Timer t = new Timer(its, "");
         for (int i = 0; i < its; i++) {
             //isForward = r.nextBoolean();
             isForward = true;
+
             thisPos = (i + (isForward ? 1 : -1)) % textArray.length;
 
             thisChar = textArray[thisPos];
@@ -37,7 +38,7 @@ public class Main {
             }
 
             prevChar = thisChar;
-            t.tick();
+            t.tick(Arrays.toString(h.getStructure().toArray()));
         }
 
         t.finished();
@@ -46,7 +47,6 @@ public class Main {
 
         System.out.println();
         System.out.println(h.print());
-        System.out.println(Arrays.toString(h.getStructure().toArray()));
         System.out.println(new String(prediction));
 
     }

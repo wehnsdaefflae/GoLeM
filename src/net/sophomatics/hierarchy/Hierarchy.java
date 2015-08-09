@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 public class Hierarchy<Sensor, Motor> {
     private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
     private final MarkovPredictorFactory<Tuple<Sensor, Motor>, Sensor> mFak;
-    private final Set<MarkovPredictor<Tuple<Sensor, Motor>, Sensor>> models;
     private final MarkovPredictor<Tuple<Sensor, Motor>, Sensor> tempModel;
 
     private MarkovPredictor<Tuple<Sensor, Motor>, Sensor> currentModel;
@@ -41,8 +40,6 @@ public class Hierarchy<Sensor, Motor> {
         this.lastCause = null;
         this.tempModel = this.mFak.newInstance();
         this.currentModel = this.mFak.newInstance();
-        this.models = new HashSet<>();
-        this.models.add(this.currentModel);
     }
 
     public Hierarchy(float threshold) {
@@ -52,7 +49,7 @@ public class Hierarchy<Sensor, Motor> {
     public List<Integer> getStructure() {
         List<Integer> structure = new ArrayList<>();
         for (Hierarchy m = this; m != null; m = m.parent) {
-            structure.add(m.models.size());
+            structure.add(m.mFak.getProducts().size() - 1);
         }
         return structure;
     }
@@ -88,7 +85,12 @@ public class Hierarchy<Sensor, Motor> {
         float thisValue, bestValue = -1f;
         List<MarkovPredictor<Tuple<Sensor, Motor>, Sensor>> bestModelList = new ArrayList<>();
 
-        for (MarkovPredictor<Tuple<Sensor, Motor>, Sensor> eachModel : this.models) {
+        for (MarkovPredictor<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
+            if (eachModel.getId() == 0) {
+                // is temp model
+                continue;
+            }
+
             thisValue = eachModel.getMatch(this.tempModel);
 
             if (bestValue < thisValue) {
@@ -106,7 +108,6 @@ public class Hierarchy<Sensor, Motor> {
 
         } else {
             bestModel = this.mFak.newInstance();
-            this.models.add(bestModel);
             if (this.parent == null) {
                 this.parent = new Hierarchy<>(this.level + 1, this.threshold);
             }

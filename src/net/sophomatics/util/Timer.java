@@ -35,8 +35,8 @@ public class Timer {
         return time;
     }
 
-    public void tick() {
-        this.tick(1d);
+    public void tick(String info) {
+        this.tick(1d, info);
     }
 
     private String getProgressText() {
@@ -73,12 +73,12 @@ public class Timer {
 
     }
 
-    public void tick(final double iterationValue) {
+    public void tick(final double iterationValue, String info) {
         this.thisTime = System.currentTimeMillis();
         if (this.thisTime - this.lastTime >= this.timeInterval) {
             this.currentIterations += this.intIterations;
 
-            System.out.println(this.getProgressText());
+            System.out.println(this.getProgressText() + info);
 
             this.intIterations = 0;
             this.lastTime = this.thisTime;

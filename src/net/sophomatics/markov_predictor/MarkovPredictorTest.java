@@ -22,7 +22,7 @@ public class MarkovPredictorTest {
         Timer t = new Timer(size, "Generating random characters.");
         for (int i = 0; i < size; i++) {
             randomArray[i] = (char) (r.nextInt(26) + 97);
-            t.tick();
+            t.tick("");
         }
         t.finished();
         return randomArray;
@@ -30,16 +30,15 @@ public class MarkovPredictorTest {
 
     public static void main(String[] args) {
         int size = 10;
-        char[] randomArray0 = "peter".toCharArray();//getRandomArray(size);
-        char[] randomArray1 = "piper".toCharArray();//getRandomArray(size);
+        char[] randomArray0 = "peter piper ".toCharArray();//getRandomArray(size);
+        char[] randomArray1 = "peter piper ".toCharArray();//getRandomArray(size);
 
         System.out.println(new String(randomArray0));
         System.out.println(new String(randomArray1));
         System.out.println();
 
-        MarkovPredictorFactory<Character, Character> mFak = new MarkovPredictorFactory<>();
-        MarkovPredictor<Character, Character> mp0 = mFak.newInstance();
-        MarkovPredictor<Character, Character> mp1 = mFak.newInstance();
+        MatrixMarkovPredictor<Character, Character> mp0 = new MatrixMarkovPredictor<>(0);
+        MatrixMarkovPredictor<Character, Character> mp1 = new MatrixMarkovPredictor<>(0);
 
         for (int i = 1; i < randomArray0.length; i++) {
             mp0.store(randomArray0[i-1], randomArray0[i]);
@@ -54,7 +53,16 @@ public class MarkovPredictorTest {
         System.out.println(mp1.print());
         System.out.println();
 
-        System.out.println(mp0.getMatch(mp1));
-        System.out.println(mp1.getMatch(mp0));
+        System.out.println(mp0.getLikelihood(mp1));
+        System.out.println(mp1.getLikelihood(mp0));
+        System.out.println();
+
+        System.out.println(mp0.getDeviationQuotient(mp1));
+        System.out.println(mp1.getDeviationQuotient(mp0));
+        System.out.println();
+
+        System.out.println(mp0.getVectorDistance(mp1));
+        System.out.println(mp1.getVectorDistance(mp0));
+        System.out.println();
     }
 }

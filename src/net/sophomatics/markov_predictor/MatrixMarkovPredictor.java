@@ -134,12 +134,12 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
 
     @Override
     public float getMatch(MarkovPredictor<Condition, Consequence> other) {
-        //return this.getVectorDistance(other);
-        return this.getLikelihood(other);
+        return this.getVectorDistance(other);
+        //return this.getLikelihood(other);
         //return this.getDeviationQuotient(other);
     }
 
-    private float getVectorDistance(MarkovPredictor<Condition, Consequence> other) {
+    public float getVectorDistance(MarkovPredictor<Condition, Consequence> other) {
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
 
         Set<Condition> causes = new HashSet<>(this.matrix.keySet());
@@ -162,10 +162,10 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             }
         }
 
-        return (float) (Math.sqrt(sum) / Math.sqrt(size));
+        return 1f - (float) (Math.sqrt(sum) / Math.sqrt(size));
     }
 
-    private float getDeviationQuotient(MarkovPredictor<Condition, Consequence> other) {
+    public float getDeviationQuotient(MarkovPredictor<Condition, Consequence> other) {
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
 
         int obsFreqSum = 0, maxFreqSum = 0;
@@ -184,7 +184,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
         return (float) obsFreqSum / maxFreqSum;
     }
 
-    private float getLikelihood(MarkovPredictor<Condition, Consequence> other) {
+    public float getLikelihood(MarkovPredictor<Condition, Consequence> other) {
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
         float similarity = 1f;
 
