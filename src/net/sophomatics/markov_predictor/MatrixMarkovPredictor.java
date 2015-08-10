@@ -95,7 +95,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     @Override
-    public Set<Consequence> getAllConsequences() {
+    public Set<Consequence> getAllEffects() {
         Set<Consequence> allCons = new HashSet<>();
         for (Condition eachCondition : this.matrix.keySet()) {
             allCons.addAll(this.matrix.getKeys(eachCondition));
@@ -104,12 +104,17 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     @Override
+    public Set<Condition> getAllCauses() {
+        return new HashSet<>(this.matrix.keySet());
+    }
+
+    @Override
     public void store(Condition cause, Consequence effect) {
         this.matrix.put(cause, effect, this.getFrequency(cause, effect) + 1);
     }
 
     @Override
-    public Consequence getConsequence(Condition cause) {
+    public Consequence getEffect(Condition cause) {
         Map<Consequence, Integer> row = this.matrix.get(cause);
         if (row == null) {
             return null;
@@ -172,7 +177,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
         Consequence effect;
 
         for (Condition cause : cast.matrix.keySet()) {
-            effect = cast.getConsequence(cause);
+            effect = cast.getEffect(cause);
             obsFreqSum += this.getFrequency(cause, effect);
             maxFreqSum += this.getMaxFrequency(cause);
         }
@@ -185,6 +190,8 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
     }
 
     public float getLikelihood(MarkovPredictor<Condition, Consequence> other) {
+        // using likelihood as MarkovPredictor.getMatch() causes perfect models, makes ]0, 1[ thresholds redundant
+
         MatrixMarkovPredictor<Condition, Consequence> cast = (MatrixMarkovPredictor<Condition, Consequence>) other;
         float similarity = 1f;
 
@@ -248,8 +255,6 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
         if (mass < 1) {
             return 1f;
         }
-
         return (float) this.getFrequency(cause, effect) / mass;
     }
-
 }

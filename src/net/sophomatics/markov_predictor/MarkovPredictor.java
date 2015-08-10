@@ -17,13 +17,15 @@ public interface MarkovPredictor<Condition, Consequence> {
 
     int getMass(Condition cause);
 
-    Set<Consequence> getAllConsequences();
+    Set<Consequence> getAllEffects();
+
+    Set<Condition> getAllCauses();
 
     float getProbability(Condition cause, Consequence effect);
 
     void store(Condition cause, Consequence effect);
 
-    Consequence getConsequence(Condition cause);
+    Consequence getEffect(Condition cause);
 
     float getMatch(MarkovPredictor<Condition, Consequence> other);
 
