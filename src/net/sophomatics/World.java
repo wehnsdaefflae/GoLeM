@@ -5,8 +5,7 @@ import net.sophomatics.util.Timer;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Main {
-
+public class World {
     private void start(String text) {
         char[] textArray = text.toCharArray();
 
@@ -22,6 +21,7 @@ public class Main {
         int absPos;
         int thisPos = 0;
         int success = 0;
+        float reward = 0;
 
         int its = 10000;
         Timer t = new Timer(its, "");
@@ -30,11 +30,10 @@ public class Main {
             if (thisChar.equals(nextChar)) {
                 success++;
             }
-
-            thisAction = a.interact(thisChar);
-
+            thisAction = a.interact(thisChar, reward);
             nextChar = a.predict(thisChar, thisAction);
             absPos = i + (thisAction ? 1 : -1);
+            reward = thisAction ? 1 : -1;
             thisPos = absPos % textArray.length;
             if (thisPos < 0) {
                 thisPos += textArray.length;
@@ -53,7 +52,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Main m = new Main();
+        World m = new World();
         String text = "peter piper picked a peck of pickled peppers a peck of pickled peppers peter piper picked if peter piper picked a peck of pickled peppers wheres the peck of pickled peppers peter piper picked ";
         //String text = "Just go to your Package Explorer and press F5, or for some laptops fn+F5. The reason is that eclipse thinks that the files are somewhere, but the files are actually somewhere else. By refreshing it, you put them both on the same page. Don't worry, you won't lose anything, but if you want to be extra careful, just back up the files from your java projects folder to somewhere safe.";
         m.start(text);

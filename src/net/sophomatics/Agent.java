@@ -66,7 +66,7 @@ public class Agent<Sensor, Motor> {
         return h.predict(s, m);
     }
 
-    public Motor interact(Sensor s) {
+    public Motor interact(Sensor s, float reward) {
         if (lastSensor != null && lastMotor != null) {
             h.perceive(lastSensor, lastMotor, s);
         }
