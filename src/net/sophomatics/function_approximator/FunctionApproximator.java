@@ -5,5 +5,6 @@ package net.sophomatics.function_approximator;
  */
 public interface FunctionApproximator<Condition> {
     void approximate(Condition cause, float value);
+
     float getValue(Condition cause);
 }

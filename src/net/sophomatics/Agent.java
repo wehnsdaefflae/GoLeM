@@ -11,7 +11,6 @@ import java.util.*;
  * @author mark
  * @version 1.0
  * @since 2015-08-10
- *
  */
 public class Agent<Sensor, Motor> {
     private final Random r;
@@ -51,7 +50,7 @@ public class Agent<Sensor, Motor> {
     private Motor randomMotor() {
         Iterator<Motor> it = actions.iterator();
         Motor eachMotor = null;
-        for (int p = r.nextInt(actions.size()); p-- >= 0 ; eachMotor = it.next());
+        for (int p = r.nextInt(actions.size()); p-- >= 0; eachMotor = it.next()) ;
         return eachMotor;
     }
 

@@ -13,7 +13,6 @@ import java.util.logging.Logger;
  * @author mark
  * @version 1.0
  * @since 2015-08-05
- *
  */
 public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable implements MarkovPredictor<Condition, Consequence> {
     private final Matrix<Condition, Consequence, Integer> matrix;
@@ -30,7 +29,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             return false;
         } else if (other == this) {
             return true;
-        } else if (!(other instanceof MarkovPredictor)){
+        } else if (!(other instanceof MarkovPredictor)) {
             return false;
         }
         MatrixMarkovPredictor cast = (MatrixMarkovPredictor) other;

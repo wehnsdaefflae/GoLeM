@@ -50,10 +50,10 @@ public class NestedMapMatrix<A, B, C> extends HashMap<A, Map<B, C>> implements M
 
         // sort if sortable
         if (rowHeader.get(0) instanceof Comparable) {
-            Collections.sort((List<Comparable>) rowHeader);
+            Collections.sort((List) rowHeader);
         }
         if (columnHeader.get(0) instanceof Comparable) {
-            Collections.sort((List<Comparable>) columnHeader);
+            Collections.sort((List) columnHeader);
         }
 
         // determine row format

@@ -53,8 +53,7 @@ public class Tuple<A, B> implements Comparable<Tuple<A, B>> {
     public int compareTo(Tuple<A, B> other) {
         if (other == null) {
             return -1;
-        }
-        if (other == this) {
+        } else if (other == this) {
             return 0;
         }
 

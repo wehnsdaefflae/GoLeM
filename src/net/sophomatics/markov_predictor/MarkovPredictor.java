@@ -8,7 +8,6 @@ import java.util.Set;
  * @author mark
  * @version 1.0
  * @since 2015-08-05
- *
  */
 public interface MarkovPredictor<Condition, Consequence> {
     int getFrequency(Condition cause, Consequence effect);

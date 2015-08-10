@@ -15,7 +15,6 @@ import java.util.logging.Logger;
  * @author mark
  * @version 1.0
  * @since 2015-08-05
- *
  */
 public class Hierarchy<Sensor, Motor> {
     private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
@@ -202,7 +201,7 @@ public class Hierarchy<Sensor, Motor> {
 
         Motor m = null;
         Iterator<Motor> it = actions.iterator();
-        for (int p = r.nextInt(actions.size()); p-- >= 0 ; m = it.next());
+        for (int p = r.nextInt(actions.size()); p-- >= 0; m = it.next()) ;
         return m;
     }
 }
