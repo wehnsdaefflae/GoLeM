@@ -166,7 +166,7 @@ public class MatrixMarkovPredictor<Condition, Consequence> extends Identifiable 
             }
         }
 
-        return 1f - (float) (Math.sqrt(sum) / Math.sqrt(size));
+        return 1f - (float) (sum / size);
     }
 
     public float getDeviationQuotient(MarkovPredictor<Condition, Consequence> other) {

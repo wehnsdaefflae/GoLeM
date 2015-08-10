@@ -13,7 +13,7 @@ public class World {
         actions.add(true);
         //actions.add(false);
 
-        Agent<Character, Boolean> a = new Agent<>(.5f, actions);
+        Agent<Character, Boolean> a = new Agent<>(1f, actions);
 
         boolean thisAction;
         Character thisChar;
@@ -23,7 +23,7 @@ public class World {
         int success = 0;
         float reward = 0;
 
-        int its = 10000;
+        int its = 100000;
         Timer t = new Timer(its, "");
         for (int i = 0; i < its; i++) {
             thisChar = textArray[thisPos];
