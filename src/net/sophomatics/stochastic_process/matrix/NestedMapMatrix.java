@@ -1,4 +1,4 @@
-package net.sophomatics.matrix;
+package net.sophomatics.stochastic_process.matrix;
 
 import java.util.*;
 

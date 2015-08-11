@@ -1,7 +1,7 @@
 package net.sophomatics.stochastic_process;
 
-import net.sophomatics.matrix.Matrix;
-import net.sophomatics.matrix.NestedMapMatrix;
+import net.sophomatics.stochastic_process.matrix.Matrix;
+import net.sophomatics.stochastic_process.matrix.NestedMapMatrix;
 import net.sophomatics.util.Identifiable;
 
 import java.util.*;
