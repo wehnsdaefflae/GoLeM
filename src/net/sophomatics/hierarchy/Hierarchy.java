@@ -1,9 +1,9 @@
 package net.sophomatics.hierarchy;
 
 
-import net.sophomatics.markov_predictor.MarkovPredictor;
-import net.sophomatics.markov_predictor.MarkovPredictorFactory;
-import net.sophomatics.markov_predictor.MatrixMarkovPredictor;
+import net.sophomatics.stochastic_process.StochasticProcess;
+import net.sophomatics.stochastic_process.StochasticProcessFactory;
+import net.sophomatics.stochastic_process.MatrixStochasticProcess;
 import net.sophomatics.util.Tuple;
 
 import java.util.*;
@@ -18,11 +18,11 @@ import java.util.logging.Logger;
  */
 public class Hierarchy<Sensor, Motor> {
     private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
-    private final MarkovPredictorFactory<Tuple<Sensor, Motor>, Sensor> mFak;
-    private final MarkovPredictor<Tuple<Sensor, Motor>, Sensor> tempModel;
+    private final StochasticProcessFactory<Tuple<Sensor, Motor>, Sensor> mFak;
+    private final StochasticProcess<Tuple<Sensor, Motor>, Sensor> tempModel;
 
-    private MarkovPredictor<Tuple<Sensor, Motor>, Sensor> currentModel;
-    private MarkovPredictor<Tuple<Sensor, Motor>, Sensor> lastModel;
+    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> currentModel;
+    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> lastModel;
 
     private Hierarchy<Integer, Tuple<Sensor, Motor>> parent;
 
@@ -37,10 +37,10 @@ public class Hierarchy<Sensor, Motor> {
         this.level = level;
         this.parent = null;
         this.threshold = threshold;
-        this.mFak = new MarkovPredictorFactory<>();
+        this.mFak = new StochasticProcessFactory<>();
         this.lastModel = null;
         this.lastCause = null;
-        this.tempModel = new MatrixMarkovPredictor<>(-1);
+        this.tempModel = new MatrixStochasticProcess<>(-1);
         this.currentModel = this.mFak.newInstance();
         this.r = r;
     }
@@ -69,28 +69,28 @@ public class Hierarchy<Sensor, Motor> {
         sb.append(String.format("Level %s, %s\n", this.level, Arrays.toString(structure.toArray())));
         sb.append(tempModel.print());
         sb.append("\n");
-        for (MarkovPredictor<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
+        for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
             sb.append(eachModel.print());
             sb.append("\n");
         }
         return sb.toString();
     }
 
-    public List<MarkovPredictor> getTrace() {
-        List<MarkovPredictor> trace = new ArrayList<>();
+    public List<StochasticProcess> getTrace() {
+        List<StochasticProcess> trace = new ArrayList<>();
         for (Hierarchy m = this; m != null; m = m.parent) {
             trace.add(m.currentModel);
         }
         return trace;
     }
 
-    private MarkovPredictor<Tuple<Sensor, Motor>, Sensor> findModel() {
-        MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
+    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> findModel() {
+        StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel;
 
         float thisValue, bestValue = -1f;
-        List<MarkovPredictor<Tuple<Sensor, Motor>, Sensor>> bestModelList = new ArrayList<>();
+        List<StochasticProcess<Tuple<Sensor, Motor>, Sensor>> bestModelList = new ArrayList<>();
 
-        for (MarkovPredictor<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
+        for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
             thisValue = eachModel.getMatch(this.tempModel);
 
             if (bestValue < thisValue) {
@@ -128,7 +128,7 @@ public class Hierarchy<Sensor, Motor> {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m0);
 
         if (this.isBreakdown(cause, s1)) {
-            MarkovPredictor<Tuple<Sensor, Motor>, Sensor> bestModel;
+            StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel;
 
             if (this.parent == null) {
                 bestModel = this.currentModel;

@@ -1,7 +1,7 @@
 package net.sophomatics;
 
 import net.sophomatics.hierarchy.Hierarchy;
-import net.sophomatics.markov_predictor.MarkovPredictor;
+import net.sophomatics.stochastic_process.StochasticProcess;
 
 import java.util.*;
 
@@ -39,9 +39,9 @@ public class Agent<Sensor, Motor> {
     }
 
     public List<Integer> getTrace() {
-        List<MarkovPredictor> lMp = h.getTrace();
+        List<StochasticProcess> lMp = h.getTrace();
         List<Integer> lInt = new ArrayList<>(lMp.size());
-        for (MarkovPredictor eachMp : lMp) {
+        for (StochasticProcess eachMp : lMp) {
             lInt.add(eachMp.getId());
         }
         return lInt;

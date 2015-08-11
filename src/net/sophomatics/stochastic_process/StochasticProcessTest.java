@@ -1,4 +1,4 @@
-package net.sophomatics.markov_predictor;
+package net.sophomatics.stochastic_process;
 
 import net.sophomatics.util.Timer;
 
@@ -13,9 +13,9 @@ import java.util.logging.Logger;
  * @since 2015-08-05
  *
  */
-public class MarkovPredictorTest {
+public class StochasticProcessTest {
     private final static Random r = new Random(3771);
-    private final static Logger logger = Logger.getLogger(MarkovPredictorTest.class.getSimpleName());
+    private final static Logger logger = Logger.getLogger(StochasticProcessTest.class.getSimpleName());
 
     private static char[] getRandomArray(int size) {
         char[] randomArray = new char[size];
@@ -37,8 +37,8 @@ public class MarkovPredictorTest {
         System.out.println(new String(randomArray1));
         System.out.println();
 
-        MatrixMarkovPredictor<Character, Character> mp0 = new MatrixMarkovPredictor<>(0);
-        MatrixMarkovPredictor<Character, Character> mp1 = new MatrixMarkovPredictor<>(0);
+        MatrixStochasticProcess<Character, Character> mp0 = new MatrixStochasticProcess<>(0);
+        MatrixStochasticProcess<Character, Character> mp1 = new MatrixStochasticProcess<>(0);
 
         for (int i = 1; i < randomArray0.length; i++) {
             mp0.store(randomArray0[i-1], randomArray0[i]);

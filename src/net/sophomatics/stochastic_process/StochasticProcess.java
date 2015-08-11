@@ -1,4 +1,4 @@
-package net.sophomatics.markov_predictor;
+package net.sophomatics.stochastic_process;
 
 import java.util.Set;
 
@@ -9,7 +9,7 @@ import java.util.Set;
  * @version 1.0
  * @since 2015-08-05
  */
-public interface MarkovPredictor<Condition, Consequence> {
+public interface StochasticProcess<Condition, Consequence> {
     int getFrequency(Condition cause, Consequence effect);
 
     int getMaxFrequency(Condition cause);
@@ -26,9 +26,9 @@ public interface MarkovPredictor<Condition, Consequence> {
 
     Consequence getEffect(Condition cause);
 
-    float getMatch(MarkovPredictor<Condition, Consequence> other);
+    float getMatch(StochasticProcess<Condition, Consequence> other);
 
-    void add(MarkovPredictor<Condition, Consequence> other);
+    void add(StochasticProcess<Condition, Consequence> other);
 
     String print();
 
