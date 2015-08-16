@@ -152,11 +152,10 @@ public class Hierarchy<Sensor, Motor> {
     }
 
     public Sensor predict(Sensor s, Motor m) {
-        Set<Sensor> allCons = new HashSet<>();
+        Set<Sensor> allCons = new HashSet<>(this.tempModel.getAllEffects());
         if (this.currentModel != null) {
-            this.currentModel.getAllEffects();
+            allCons.addAll(this.currentModel.getAllEffects());
         }
-        allCons.addAll(this.tempModel.getAllEffects());
 
         if (allCons.size() < 1) {
             return s;
@@ -168,11 +167,10 @@ public class Hierarchy<Sensor, Motor> {
         double thisValue, maxValue = -1d;
 
         for (Sensor s1 : allCons) {
-            thisValue = 0;
+            thisValue = this.tempModel.getFrequency(cause, s1);
             if (this.currentModel != null) {
-                this.currentModel.getFrequency(cause, s1);
+                thisValue += this.currentModel.getFrequency(cause, s1);
             }
-            thisValue += this.tempModel.getFrequency(cause, s1);
             if (maxValue < thisValue) {
                 bestSensor = s1;
                 maxValue = thisValue;

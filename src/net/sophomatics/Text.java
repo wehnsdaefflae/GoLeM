@@ -13,7 +13,7 @@ public class Text {
         actions.add(true);
         //actions.add(false);
 
-        Agent<Character, Boolean> a = new Agent<>(.4f, actions);
+        Agent<Character, Boolean> a = new Agent<>(1f, actions);
 
         boolean thisAction;
         Character thisChar;

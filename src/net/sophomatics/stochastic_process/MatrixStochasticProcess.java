@@ -139,8 +139,8 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
     @Override
     public float getMatch(StochasticProcess<Condition, Consequence> other) {
         return this.getCosineSimilarity(other);
-        //return this.getVectorDistance(other);
         //return this.getLikelihood(other);
+        //return this.getVectorDistance(other);
         //return this.getDeviationQuotient(other);
     }
 
