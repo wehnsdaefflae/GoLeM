@@ -33,15 +33,15 @@ public class Hierarchy<Sensor, Motor> {
 
     private final Random r;
 
-    public Hierarchy(int level, float threshold, Random r) {
+    private Hierarchy(int level, float threshold, Random r) {
         this.level = level;
         this.parent = null;
         this.threshold = threshold;
         this.mFak = new StochasticProcessFactory<>();
+        this.currentModel = null;
         this.lastModel = null;
         this.lastCause = null;
         this.tempModel = new MatrixStochasticProcess<>(-1);
-        this.currentModel = this.mFak.newInstance();
         this.r = r;
     }
 
@@ -78,39 +78,26 @@ public class Hierarchy<Sensor, Motor> {
 
     public List<StochasticProcess> getTrace() {
         List<StochasticProcess> trace = new ArrayList<>();
-        for (Hierarchy m = this; m != null; m = m.parent) {
+        for (Hierarchy m = this; m.currentModel != null; m = m.parent) {
             trace.add(m.currentModel);
         }
         return trace;
     }
 
     private StochasticProcess<Tuple<Sensor, Motor>, Sensor> findModel() {
-        StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel;
+        StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel = null;
 
-        float thisValue, bestValue = -1f;
-        List<StochasticProcess<Tuple<Sensor, Motor>, Sensor>> bestModelList = new ArrayList<>();
-
+        float thisValue, bestValue = this.threshold;
         for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
             thisValue = eachModel.getMatch(this.tempModel);
-
-            if (bestValue < thisValue) {
-                bestModelList.clear();
-                bestModelList.add(eachModel);
+            if (thisValue >= bestValue) {
+                bestModel = eachModel;
                 bestValue = thisValue;
-
-            } else if (bestValue == thisValue) {
-                bestModelList.add(eachModel);
             }
         }
 
-        if (bestValue >= this.threshold) {
-            bestModel = bestModelList.get(0);
-
-        } else {
+        if (bestModel == null) {
             bestModel = this.mFak.newInstance();
-            if (this.parent == null) {
-                this.parent = new Hierarchy<>(this.level + 1, this.threshold, this.r);
-            }
         }
 
         return bestModel;
@@ -119,8 +106,10 @@ public class Hierarchy<Sensor, Motor> {
     private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
         int bestFreq = this.tempModel.getMaxFrequency(cause);
         int thisFreq = this.tempModel.getFrequency(cause, effect);
-        //bestFreq += this.currentModel.getMaxFrequency(cause);
-        //thisFreq += this.currentModel.getFrequency(cause, effect);
+        if (false && this.currentModel != null) {
+            bestFreq += this.currentModel.getMaxFrequency(cause);
+            thisFreq += this.currentModel.getFrequency(cause, effect);
+        }
         return thisFreq < bestFreq;
     }
 
@@ -131,29 +120,30 @@ public class Hierarchy<Sensor, Motor> {
             StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel;
 
             if (this.parent == null) {
+                this.parent = new Hierarchy<>(this.level + 1, this.threshold, this.r);
+                this.currentModel = this.mFak.newInstance();
                 bestModel = this.currentModel;
 
             } else {
-                int bestId = this.parent.predict(currentModel.getId(), cause);
+                int bestId = this.parent.predict(this.currentModel.getId(), cause);
                 bestModel = this.mFak.get(bestId);
-            }
 
-            float sim = bestModel.getMatch(this.tempModel);
-            if (sim < this.threshold) {
-                bestModel = this.findModel();
+                float sim = bestModel.getMatch(this.tempModel);
+                if (sim < this.threshold) {
+                    bestModel = this.findModel();
+                }
             }
 
             bestModel.add(this.tempModel);
             this.tempModel.clear();
 
-            if (this.parent != null) {
-                if (this.lastModel != null && this.lastCause != null) {
-                    this.parent.perceive(this.lastModel.getId(), this.lastCause, bestModel.getId());
-                    int newId = this.parent.predict(bestModel.getId(), cause);
-                    this.currentModel = this.mFak.get(newId);
-                    this.nextCause = this.parent.act(newId);
-                }
+            if (this.lastModel != null && this.lastCause != null) {
+                this.parent.perceive(this.lastModel.getId(), this.lastCause, bestModel.getId());
+                int nextId = this.parent.predict(bestModel.getId(), cause);
+                this.currentModel = this.mFak.get(nextId);
+                this.nextCause = this.parent.act(nextId);
             }
+
             this.lastModel = bestModel;
             this.lastCause = cause;
         }
@@ -162,7 +152,10 @@ public class Hierarchy<Sensor, Motor> {
     }
 
     public Sensor predict(Sensor s, Motor m) {
-        Set<Sensor> allCons = this.currentModel.getAllEffects();
+        Set<Sensor> allCons = new HashSet<>();
+        if (this.currentModel != null) {
+            this.currentModel.getAllEffects();
+        }
         allCons.addAll(this.tempModel.getAllEffects());
 
         if (allCons.size() < 1) {
@@ -175,7 +168,11 @@ public class Hierarchy<Sensor, Motor> {
         double thisValue, maxValue = -1d;
 
         for (Sensor s1 : allCons) {
-            thisValue = this.currentModel.getFrequency(cause, s1) + this.tempModel.getFrequency(cause, s1);
+            thisValue = 0;
+            if (this.currentModel != null) {
+                this.currentModel.getFrequency(cause, s1);
+            }
+            thisValue += this.tempModel.getFrequency(cause, s1);
             if (maxValue < thisValue) {
                 bestSensor = s1;
                 maxValue = thisValue;
@@ -195,8 +192,11 @@ public class Hierarchy<Sensor, Motor> {
         for (Tuple<Sensor, Motor> eachCause : this.tempModel.getAllCauses()) {
             actions.add(eachCause.b);
         }
-        for (Tuple<Sensor, Motor> eachCause : this.currentModel.getAllCauses()) {
-            actions.add(eachCause.b);
+
+        if (this.currentModel != null) {
+            for (Tuple<Sensor, Motor> eachCause : this.currentModel.getAllCauses()) {
+                actions.add(eachCause.b);
+            }
         }
 
         Motor m = null;

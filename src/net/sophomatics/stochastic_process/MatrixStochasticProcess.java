@@ -138,8 +138,8 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
 
     @Override
     public float getMatch(StochasticProcess<Condition, Consequence> other) {
-        return this.getVectorDistance(other);
-        //return this.getLikelihood(other);
+        //return this.getVectorDistance(other);
+        return this.getLikelihood(other);
         //return this.getDeviationQuotient(other);
     }
 
@@ -189,9 +189,7 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
     }
 
     public float getLikelihood(StochasticProcess<Condition, Consequence> other) {
-        // using likelihood as MarkovPredictor.getMatch() causes perfect models, makes ]0, 1[ thresholds redundant
-
-        MatrixStochasticProcess<Condition, Consequence> cast = (MatrixStochasticProcess<Condition, Consequence>) other;
+        MatrixStochasticProcess<Condition, Consequence> castOther = (MatrixStochasticProcess<Condition, Consequence>) other;
         float similarity = 1f;
 
         Condition otherCause;
@@ -200,11 +198,11 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
         Map<Consequence, Integer> thisRow;
         Integer thisFrequency, sum;
 
-        for (Map.Entry<Condition, Map<Consequence, Integer>> otherEntry : cast.matrix.entrySet()) {
+        for (Map.Entry<Condition, Map<Consequence, Integer>> otherEntry : castOther.matrix.entrySet()) {
             otherCause = otherEntry.getKey();
             thisRow = this.matrix.get(otherCause);
             if (thisRow == null) {
-                continue;
+                return 0f;
             }
             sum = this.getMass(otherCause);
             otherRow = otherEntry.getValue();
@@ -218,7 +216,6 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
             }
         }
 
-        //System.out.println(similarity);
         return similarity;
     }
 
