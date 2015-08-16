@@ -138,9 +138,45 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
 
     @Override
     public float getMatch(StochasticProcess<Condition, Consequence> other) {
+        return this.getCosineSimilarity(other);
         //return this.getVectorDistance(other);
-        return this.getLikelihood(other);
+        //return this.getLikelihood(other);
         //return this.getDeviationQuotient(other);
+    }
+
+    public float getCosineSimilarity(StochasticProcess<Condition, Consequence> other) {
+        MatrixStochasticProcess<Condition, Consequence> cast = (MatrixStochasticProcess<Condition, Consequence>) other;
+
+        Set<Condition> causes = new HashSet<>(this.matrix.keySet());
+        causes.addAll(cast.matrix.keySet());
+
+        Set<Consequence> effects = new HashSet<>();
+
+        for (Condition eachCause : causes) {
+            effects.addAll(this.matrix.getKeys(eachCause));
+            effects.addAll(cast.matrix.getKeys(eachCause));
+        }
+
+        int dotProduct = 0;
+        int normA = 0;
+        int normB = 0;
+        int a;
+        int b;
+        for (Condition eachCause : causes) {
+            for (Consequence eachEffect : effects) {
+                a = this.getFrequency(eachCause, eachEffect);
+                b = cast.getFrequency(eachCause, eachEffect);
+                normA += (int) Math.pow(a, 2);
+                normB += (int) Math.pow(b, 2);
+                dotProduct += a * b;
+            }
+        }
+
+        if (normA < 1 || normB < 1) {
+            return 0f;
+        }
+
+        return (float) (dotProduct / Math.sqrt(normA * normB));
     }
 
     public float getVectorDistance(StochasticProcess<Condition, Consequence> other) {
