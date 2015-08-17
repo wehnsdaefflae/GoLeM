@@ -94,7 +94,8 @@ public class Hierarchy<Sensor, Motor> {
 
         if (bestModel == null) {
             bestModel = this.mFak.newInstance();
-            this.stateProbability.put(bestModel.getId(), 1d / this.stateProbability.size());
+            double uniDist = 1d / (this.stateProbability.size() + 1);
+            this.stateProbability.put(bestModel.getId(), uniDist);
         }
 
         return bestModel;
@@ -110,6 +111,10 @@ public class Hierarchy<Sensor, Motor> {
             int currentFreq = this.currentModel.getFrequency(cause, effect);
             allFreq += currentFreq;
             prob += this.currentModel.getFrequency(cause, effect) * currentFreq;
+        }
+
+        if (allFreq < 1) {
+            return 0f;
         }
         return prob / (float) allFreq;
     }
@@ -128,13 +133,12 @@ public class Hierarchy<Sensor, Motor> {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m0);
 
         if (this.isBreakdown(cause, s1)) {
-            this.sensorUpdateStateProbability(this.tempModel);
-
             StochasticProcess<Tuple<Sensor, Motor>, Sensor> thisModel;
 
             if (this.parent == null) {
                 this.parent = new Hierarchy<>(this.level + 1, this.threshold, this.r);
                 this.currentModel = this.mFak.newInstance();
+                this.stateProbability.put(this.currentModel.getId(), 1d);
                 thisModel = this.currentModel;
 
             } else {
@@ -147,6 +151,7 @@ public class Hierarchy<Sensor, Motor> {
                 }
             }
             thisModel.add(this.tempModel);
+            this.sensorUpdateStateProbability(this.tempModel);
             this.tempModel.clear();
 
             if (this.lastModel != null && this.lastCause != null) {
@@ -154,9 +159,8 @@ public class Hierarchy<Sensor, Motor> {
                 int nextId = this.parent.predict(thisModel.getId(), cause);
                 this.currentModel = this.mFak.get(nextId);
                 this.nextCause = this.parent.act(nextId);
+                this.motorUpdateStateProbability(this.nextCause);
             }
-
-            this.motorUpdateStateProbability(this.nextCause);
 
             this.lastModel = thisModel;
             this.lastCause = cause;
@@ -171,19 +175,28 @@ public class Hierarchy<Sensor, Motor> {
 
     private void sensorUpdateStateProbability(StochasticProcess<Tuple<Sensor, Motor>, Sensor> observation) {
         int stateId;
-        double newValue, sum = 0d;
+        double similarity, newValue, sum = 0d;
 
         // update
         for (Map.Entry<Integer, Double> entry : this.stateProbability.entrySet()) {
             stateId = entry.getKey();
-            newValue = entry.getValue() * this.mFak.get(stateId).getMatch(observation);
+            similarity = this.mFak.get(stateId).getMatch(observation);
+            newValue = entry.getValue() * similarity;
+            if (Double.isNaN(newValue)) {
+                throw new IllegalArgumentException();
+            }
             entry.setValue(newValue);
             sum += newValue;
         }
 
         // resample
         for (Map.Entry<Integer, Double> entry : this.stateProbability.entrySet()) {
-            entry.setValue(entry.getValue() / sum);
+            if (sum == 0d) {
+                newValue = 0d;
+            } else {
+                newValue = entry.getValue() / sum;
+            }
+            entry.setValue(newValue);
         }
     }
 
@@ -205,6 +218,10 @@ public class Hierarchy<Sensor, Motor> {
                 abstractCause = new Tuple<>(fromState, abstractAction);
                 probability = this.parent.getJointProbability(abstractCause, abstractConsequence);
                 v += probability * this.stateProbability.get(fromState);
+
+                if (Double.isNaN(v)) {
+                    throw new IllegalArgumentException();
+                }
             }
             // update the belief distribution accordingly
             posterior.put(abstractConsequence, v);
