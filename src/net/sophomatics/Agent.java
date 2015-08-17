@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class Agent<Sensor, Motor> {
     private final Random r;
-    private final Hierarchy<Sensor, Motor> h;
+    public final Hierarchy<Sensor, Motor> h;
     private final Set<Motor> actions;
     private Sensor lastSensor;
     private Motor lastMotor;

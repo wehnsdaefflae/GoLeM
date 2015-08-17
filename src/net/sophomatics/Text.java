@@ -9,7 +9,7 @@ public class Text {
     private void start(String text) {
         char[] textArray = text.toCharArray();
 
-        Set<Boolean> actions = new HashSet<>(2);
+        Set<Boolean> actions = new HashSet<>();
         actions.add(true);
         //actions.add(false);
 
@@ -23,7 +23,7 @@ public class Text {
         int success = 0;
         float reward = 0;
 
-        int its = 100000;
+        int its = 10000;
         Timer t = new Timer(its, "");
         for (int i = 0; i < its; i++) {
             thisChar = textArray[thisPos];
@@ -48,7 +48,7 @@ public class Text {
 
         System.out.println(a.toString());
         System.out.println(String.format("Prediction success rate: %.2f percent", (float) (success * 100) / its));
-
+        System.out.println(a.h.printBeliefDistribution());
     }
 
     public static void main(String[] args) {

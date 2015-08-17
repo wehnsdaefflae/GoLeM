@@ -1,9 +1,9 @@
 package net.sophomatics.hierarchy;
 
 
+import net.sophomatics.stochastic_process.MatrixStochasticProcess;
 import net.sophomatics.stochastic_process.StochasticProcess;
 import net.sophomatics.stochastic_process.StochasticProcessFactory;
-import net.sophomatics.stochastic_process.MatrixStochasticProcess;
 import net.sophomatics.util.Tuple;
 
 import java.util.*;
@@ -18,20 +18,15 @@ import java.util.logging.Logger;
  */
 public class Hierarchy<Sensor, Motor> {
     private final static Logger logger = Logger.getLogger(Hierarchy.class.getSimpleName());
+    public final int level;
     private final StochasticProcessFactory<Tuple<Sensor, Motor>, Sensor> mFak;
     private final StochasticProcess<Tuple<Sensor, Motor>, Sensor> tempModel;
-
-    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> currentModel;
-    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> lastModel;
-
-    private Hierarchy<Integer, Tuple<Sensor, Motor>> parent;
-
-    private Tuple<Sensor, Motor> lastCause;
-    private Tuple<Sensor, Motor> nextCause;
     private final float threshold;
-    public final int level;
-
     private final Random r;
+    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> currentModel, lastModel;
+    private Hierarchy<Integer, Tuple<Sensor, Motor>> parent;
+    private Tuple<Sensor, Motor> lastCause, nextCause;
+    private Map<Integer, Double> stateProbability;
 
     private Hierarchy(int level, float threshold, Random r) {
         this.level = level;
@@ -43,6 +38,7 @@ public class Hierarchy<Sensor, Motor> {
         this.lastCause = null;
         this.tempModel = new MatrixStochasticProcess<>(-1);
         this.r = r;
+        this.stateProbability = new HashMap<>();
     }
 
     public Hierarchy(float threshold, Random r) {
@@ -98,17 +94,32 @@ public class Hierarchy<Sensor, Motor> {
 
         if (bestModel == null) {
             bestModel = this.mFak.newInstance();
+            this.stateProbability.put(bestModel.getId(), 1d / this.stateProbability.size());
         }
 
         return bestModel;
     }
 
-    private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
-        int bestFreq = this.tempModel.getMaxFrequency(cause);
-        int thisFreq = this.tempModel.getFrequency(cause, effect);
+    private float getJointProbability(Tuple<Sensor, Motor> cause, Sensor effect) {
+        int allFreq = 0;
+        int tempFreq = this.tempModel.getFrequency(cause, effect);
+        allFreq += tempFreq;
+        float prob = this.tempModel.getProbability(cause, effect) * tempFreq;
+
         if (false && this.currentModel != null) {
-            bestFreq += this.currentModel.getMaxFrequency(cause);
+            int currentFreq = this.currentModel.getFrequency(cause, effect);
+            allFreq += currentFreq;
+            prob += this.currentModel.getFrequency(cause, effect) * currentFreq;
+        }
+        return prob / (float) allFreq;
+    }
+
+    private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
+        int thisFreq = this.tempModel.getFrequency(cause, effect);
+        int bestFreq = this.tempModel.getMaxFrequency(cause);
+        if (false && this.currentModel != null) {
             thisFreq += this.currentModel.getFrequency(cause, effect);
+            bestFreq += this.currentModel.getMaxFrequency(cause);
         }
         return thisFreq < bestFreq;
     }
@@ -117,38 +128,88 @@ public class Hierarchy<Sensor, Motor> {
         Tuple<Sensor, Motor> cause = new Tuple<>(s0, m0);
 
         if (this.isBreakdown(cause, s1)) {
-            StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel;
+            this.sensorUpdateStateProbability(this.tempModel);
+
+            StochasticProcess<Tuple<Sensor, Motor>, Sensor> thisModel;
 
             if (this.parent == null) {
                 this.parent = new Hierarchy<>(this.level + 1, this.threshold, this.r);
                 this.currentModel = this.mFak.newInstance();
-                bestModel = this.currentModel;
+                thisModel = this.currentModel;
 
             } else {
                 int bestId = this.parent.predict(this.currentModel.getId(), cause);
-                bestModel = this.mFak.get(bestId);
+                thisModel = this.mFak.get(bestId);
 
-                float sim = bestModel.getMatch(this.tempModel);
+                float sim = thisModel.getMatch(this.tempModel);
                 if (sim < this.threshold) {
-                    bestModel = this.findModel();
+                    thisModel = this.findModel();
                 }
             }
-
-            bestModel.add(this.tempModel);
+            thisModel.add(this.tempModel);
             this.tempModel.clear();
 
             if (this.lastModel != null && this.lastCause != null) {
-                this.parent.perceive(this.lastModel.getId(), this.lastCause, bestModel.getId());
-                int nextId = this.parent.predict(bestModel.getId(), cause);
+                this.parent.perceive(this.lastModel.getId(), this.lastCause, thisModel.getId());
+                int nextId = this.parent.predict(thisModel.getId(), cause);
                 this.currentModel = this.mFak.get(nextId);
                 this.nextCause = this.parent.act(nextId);
             }
 
-            this.lastModel = bestModel;
+            this.motorUpdateStateProbability(this.nextCause);
+
+            this.lastModel = thisModel;
             this.lastCause = cause;
         }
 
         this.tempModel.store(cause, s1);
+    }
+
+    public String printBeliefDistribution() {
+        return this.stateProbability.toString();
+    }
+
+    private void sensorUpdateStateProbability(StochasticProcess<Tuple<Sensor, Motor>, Sensor> observation) {
+        int stateId;
+        double newValue, sum = 0d;
+
+        // update
+        for (Map.Entry<Integer, Double> entry : this.stateProbability.entrySet()) {
+            stateId = entry.getKey();
+            newValue = entry.getValue() * this.mFak.get(stateId).getMatch(observation);
+            entry.setValue(newValue);
+            sum += newValue;
+        }
+
+        // resample
+        for (Map.Entry<Integer, Double> entry : this.stateProbability.entrySet()) {
+            entry.setValue(entry.getValue() / sum);
+        }
+    }
+
+    private void motorUpdateStateProbability(Tuple<Sensor, Motor> abstractAction) {
+        Map<Integer, Double> posterior = new HashMap<>(this.stateProbability.size());
+        double v;
+        float probability;
+        int fromState, abstractConsequence;
+        Tuple<Integer, Tuple<Sensor, Motor>> abstractCause;
+
+        // for all abstract states as effects...
+        for (Map.Entry<Integer, Double> entry : this.stateProbability.entrySet()) {
+            v = 0d;
+            abstractConsequence = entry.getKey();
+
+            // ... check all abstract states and the current abstract action as cause
+            for (Map.Entry<Integer, Double> subEntry : this.stateProbability.entrySet()) {
+                fromState = subEntry.getKey();
+                abstractCause = new Tuple<>(fromState, abstractAction);
+                probability = this.parent.getJointProbability(abstractCause, abstractConsequence);
+                v += probability * this.stateProbability.get(fromState);
+            }
+            // update the belief distribution accordingly
+            posterior.put(abstractConsequence, v);
+        }
+        this.stateProbability = posterior;
     }
 
     public Sensor predict(Sensor s, Motor m) {
