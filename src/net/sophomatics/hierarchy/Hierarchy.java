@@ -132,7 +132,7 @@ public class Hierarchy<Sensor, Motor> {
                 thisModel = this.currentModel;
 
             } else {
-                int bestId = this.parent.predict(this.currentModel.getId(), cause);
+                int bestId = this.parent.predict(new Tuple<>(this.currentModel.getId(), cause));
                 thisModel = this.mFak.get(bestId);
 
                 float sim = thisModel.getSimilarity(this.tempModel);
@@ -144,7 +144,7 @@ public class Hierarchy<Sensor, Motor> {
 
             if (this.lastModel != null && this.lastCause != null) {
                 this.parent.perceive(this.lastModel.getId(), this.lastCause, thisModel.getId());
-                int nextId = this.parent.predict(thisModel.getId(), cause);
+                int nextId = this.parent.predict(new Tuple<>(thisModel.getId(), cause));
                 this.currentModel = this.mFak.get(nextId);
                 this.nextCause = this.parent.act(nextId);
             }
@@ -225,20 +225,18 @@ public class Hierarchy<Sensor, Motor> {
         this.stateProbability = posterior;
     }
 
-    public Sensor predict(Sensor s, Motor m) {
+    public Sensor predict(Tuple<Sensor, Motor> cause) {
         Set<Sensor> allCons = new HashSet<>(this.tempModel.getAllEffects());
         if (this.currentModel != null) {
             allCons.addAll(this.currentModel.getAllEffects());
         }
 
         if (allCons.size() < 1) {
-            return s;
+            return cause.a;
         }
 
-        Tuple<Sensor, Motor> cause = new Tuple<>(s, m);
-
         Sensor bestSensor = null;
-        double thisValue, maxValue = -1d;
+        int thisValue, maxValue = -1;
 
         for (Sensor s1 : allCons) {
             thisValue = this.tempModel.getFrequency(cause, s1);

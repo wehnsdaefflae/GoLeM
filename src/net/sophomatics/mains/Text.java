@@ -1,7 +1,12 @@
-package net.sophomatics;
+package net.sophomatics.mains;
 
+import net.sophomatics.agents.Agent;
+import net.sophomatics.agents.EvertedAgent;
+import net.sophomatics.agents.HierarchicalAgent;
 import net.sophomatics.util.Timer;
+import net.sophomatics.util.Tuple;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +18,8 @@ public class Text {
         actions.add(true);
         //actions.add(false);
 
-        Agent<Character, Boolean> a = new Agent<>(1f, actions);
+        //Agent<Character, Boolean> a = new HierarchicalAgent<>(1f, actions);
+        Agent<Character, Boolean> a = new EvertedAgent<>(1f, actions);
 
         boolean thisAction;
         Character thisChar;
@@ -31,7 +37,7 @@ public class Text {
                 success++;
             }
             thisAction = a.interact(thisChar, reward);
-            nextChar = a.predict(thisChar, thisAction);
+            nextChar = a.predict(new Tuple<>(thisChar, thisAction));
             absPos = i + (thisAction ? 1 : -1);
             reward = thisAction ? 1 : -1;
             thisPos = absPos % textArray.length;
@@ -39,7 +45,7 @@ public class Text {
                 thisPos += textArray.length;
             }
 
-            t.tick(a.getStructureString());
+            t.tick(Arrays.toString(a.getStructure().toArray()));
         }
 
         t.finished();
@@ -48,7 +54,6 @@ public class Text {
 
         System.out.println(a.toString());
         System.out.println(String.format("Prediction success rate: %.2f percent", (float) (success * 100) / its));
-        System.out.println(a.h.printBeliefDistribution());
     }
 
     public static void main(String[] args) {

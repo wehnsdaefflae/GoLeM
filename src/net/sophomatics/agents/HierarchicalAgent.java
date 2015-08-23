@@ -1,7 +1,8 @@
-package net.sophomatics;
+package net.sophomatics.agents;
 
 import net.sophomatics.hierarchy.Hierarchy;
 import net.sophomatics.stochastic_process.StochasticProcess;
+import net.sophomatics.util.Tuple;
 
 import java.util.*;
 
@@ -12,16 +13,16 @@ import java.util.*;
  * @version 1.0
  * @since 2015-08-10
  */
-public class Agent<Sensor, Motor> {
+public class HierarchicalAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
     private final Random r;
-    public final Hierarchy<Sensor, Motor> h;
+    private final Hierarchy<Sensor, Motor> h;
     private final Set<Motor> actions;
     private Sensor lastSensor;
     private Motor lastMotor;
     private float epsilon;
     private int noInteractions;
 
-    public Agent(float threshold, Set<Motor> actions) {
+    public HierarchicalAgent(float threshold, Set<Motor> actions) {
         this.r = new Random(3771);
         this.h = new Hierarchy<>(threshold, this.r);
         this.actions = actions;
@@ -31,13 +32,10 @@ public class Agent<Sensor, Motor> {
 
     @Override
     public String toString() {
-        return this.h.print();
+        return this.getClass().getSimpleName() + this.hashCode();
     }
 
-    public String getStructureString() {
-        return Arrays.toString(h.getStructure().toArray());
-    }
-
+    @Override
     public List<Integer> getTrace() {
         List<StochasticProcess> lMp = h.getTrace();
         List<Integer> lInt = new ArrayList<>(lMp.size());
@@ -45,6 +43,11 @@ public class Agent<Sensor, Motor> {
             lInt.add(eachMp.getId());
         }
         return lInt;
+    }
+
+    @Override
+    public List<Integer> getStructure() {
+        return this.h.getStructure();
     }
 
     private Motor randomMotor() {
@@ -61,11 +64,8 @@ public class Agent<Sensor, Motor> {
         return h.act(s);
     }
 
-    public Sensor predict(Sensor s, Motor m) {
-        return h.predict(s, m);
-    }
-
-    public Motor interact(Sensor s, float reward) {
+    @Override
+    public Motor interact(Sensor s, double reward) {
         if (lastSensor != null && lastMotor != null) {
             h.perceive(lastSensor, lastMotor, s);
         }
@@ -74,5 +74,10 @@ public class Agent<Sensor, Motor> {
 
         this.noInteractions++;
         return lastMotor;
+    }
+
+    @Override
+    public Sensor predict(Tuple<Sensor, Motor> cause) {
+        return this.h.predict(cause);
     }
 }

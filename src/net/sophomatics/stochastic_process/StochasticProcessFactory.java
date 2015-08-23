@@ -37,4 +37,8 @@ public class StochasticProcessFactory<Condition, Consequence> implements Iterabl
     public Iterator<StochasticProcess<Condition, Consequence>> iterator() {
         return this.products.iterator();
     }
+
+    public int size() {
+        return this.products.size();
+    }
 }
