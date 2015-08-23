@@ -19,7 +19,7 @@ public class Text {
         //actions.add(false);
 
         //Agent<Character, Boolean> a = new HierarchicalAgent<>(1f, actions);
-        Agent<Character, Boolean> a = new EvertedAgent<>(1f, actions);
+        Agent<Character, Boolean> a = new EvertedAgent<>(1d, actions);
 
         boolean thisAction;
         Character thisChar;

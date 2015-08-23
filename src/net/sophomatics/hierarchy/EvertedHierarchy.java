@@ -109,7 +109,7 @@ public class EvertedHierarchy<Sensor, Motor> {
         return bestEffect;
     }
 
-    public StochasticProcess<Tuple<Sensor, Motor>, Sensor> getNextModel(StochasticProcess<Tuple<Sensor, Motor>, Sensor> sensor, Tuple<Sensor, Motor> motor) {
+    public StochasticProcess<Tuple<Sensor, Motor>, Sensor> getNextContext(StochasticProcess<Tuple<Sensor, Motor>, Sensor> sensor, Tuple<Sensor, Motor> motor) {
         StochasticProcess<Tuple<Sensor, Motor>, Sensor> sensorType, expectedType;
         int typeId;
 
@@ -128,7 +128,7 @@ public class EvertedHierarchy<Sensor, Motor> {
                 if (this.parent == null) {
                     this.parent = new EvertedHierarchy<>(this.threshold, this.level + 1);
                 }
-                this.thisModel = this.parent.getNextModel(this.thisObs, action);
+                this.thisModel = this.parent.getNextContext(this.thisObs, action);
             }
             this.thisObs.store(this.lastCause, typeId);
 

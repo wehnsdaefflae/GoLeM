@@ -13,8 +13,8 @@ import java.util.*;
 public class EvertedAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
     private final double threshold;
     private EvertedHierarchy<Sensor, Motor> h;
-    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> model;
-    private final StochasticProcess<Tuple<Sensor, Motor>, Sensor> obsModel;
+    private StochasticProcess<Tuple<Sensor, Motor>, Sensor> context;
+    private final StochasticProcess<Tuple<Sensor, Motor>, Sensor> observation;
     private Tuple<Sensor, Motor> lastCause;
     private final Set<Motor> actions;
     private final Random r;
@@ -22,11 +22,11 @@ public class EvertedAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
     public EvertedAgent(double threshold, Set<Motor> actions) {
         this.threshold = threshold;
         this.h = null;
-        this.obsModel = new MatrixStochasticProcess<>(-1);
-        this.model = null;
+        this.observation = new MatrixStochasticProcess<>(-1);
+        this.context = null;
         this.lastCause = null;
         this.actions = actions;
-        this.r = new Random(198553);
+        this.r = new Random(3771);
     }
 
     private Motor act(Sensor s) {
@@ -37,7 +37,7 @@ public class EvertedAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
     }
 
     private boolean isBreakdown(Tuple<Sensor, Motor> cause, Sensor effect) {
-        return this.obsModel.getFrequency(cause, effect) < this.obsModel.getMaxFrequency(cause);
+        return this.observation.getFrequency(cause, effect) < this.observation.getMaxFrequency(cause);
     }
 
     @Override
@@ -47,9 +47,9 @@ public class EvertedAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
                 if (this.h == null) {
                     this.h = new EvertedHierarchy<>(threshold);
                 }
-                this.model = this.h.getNextModel(this.obsModel, this.lastCause);
+                this.context = this.h.getNextContext(this.observation, this.lastCause);
             }
-            this.obsModel.store(this.lastCause, s);
+            this.observation.store(this.lastCause, s);
         }
         Motor m = this.act(s);
         this.lastCause = new Tuple<>(s, m);
@@ -71,9 +71,9 @@ public class EvertedAgent<Sensor, Motor> implements Agent<Sensor, Motor> {
 
     @Override
     public Sensor predict(Tuple<Sensor, Motor> cause) {
-        if (this.model == null) {
+        if (this.context == null) {
             return cause.a;
         }
-        return this.model.getEffect(cause);
+        return this.context.getEffect(cause);
     }
 }
