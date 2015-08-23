@@ -61,8 +61,8 @@ public class StochasticProcessTest {
         System.out.println(mp1.getDeviationQuotient(mp0));
         System.out.println();
 
-        System.out.println(mp0.getVectorDistance(mp1));
-        System.out.println(mp1.getVectorDistance(mp0));
+        System.out.println(mp0.getVectorCloseness(mp1));
+        System.out.println(mp1.getVectorCloseness(mp0));
         System.out.println();
     }
 }

@@ -42,7 +42,7 @@ public class EvertedAgent<Sensor, Motor> {
             Tuple<Sensor, Motor> cause = new Tuple<>(this.lastSensor, m);
             if (this.model.getFrequency(cause, s) < model.getMaxFrequency(cause)) {
                 if (this.h == null) {
-                    this.h = new EvertedHierarchy<>();
+                    this.h = new EvertedHierarchy<>(1d);
                 }
                 this.model = this.h.getNextModel(this.obsModel, cause);
                 this.obsModel.clear();

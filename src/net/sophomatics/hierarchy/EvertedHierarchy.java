@@ -9,24 +9,30 @@ import net.sophomatics.util.Tuple;
  * Created by wernsdorfer on 22.08.2015.
  */
 public class EvertedHierarchy<Sensor, Motor> {
-    EvertedHierarchy<Integer, Tuple<Sensor, Motor>> parent;
-    StochasticProcess<Tuple<Integer, Tuple<Sensor, Motor>>, Integer> thisModel;
-    StochasticProcess<Tuple<Integer, Tuple<Sensor, Motor>>, Integer> thisObs;
-    StochasticProcessFactory<Tuple<Sensor, Motor>, Sensor> mFak;
-    double threshold;
-    Tuple<Integer, Tuple<Sensor, Motor>> lastCause;
+    private EvertedHierarchy<Integer, Tuple<Sensor, Motor>> parent;
+    private StochasticProcess<Tuple<Integer, Tuple<Sensor, Motor>>, Integer> thisModel;
+    private StochasticProcess<Tuple<Integer, Tuple<Sensor, Motor>>, Integer> thisObs;
+    private StochasticProcessFactory<Tuple<Sensor, Motor>, Sensor> mFak;
+    private double threshold;
+    private Tuple<Integer, Tuple<Sensor, Motor>> lastCause;
+    private int level;
 
-    public EvertedHierarchy() {
+    public EvertedHierarchy(double threshold) {
+        this(threshold, 0);
+    }
+
+    private EvertedHierarchy(double threshold, int level) {
         this.parent = null;
+        this.lastCause = null;
         this.thisModel = null;
         this.thisObs = new MatrixStochasticProcess<>(-1);
         this.mFak = new StochasticProcessFactory<>();
-        this.threshold = 1d;
-        this.lastCause = null;
+        this.threshold = threshold;
+        this.level = level;
     }
 
     private double getMatch(StochasticProcess<Tuple<Sensor, Motor>, Sensor> token, StochasticProcess<Tuple<Sensor, Motor>, Sensor> type) {
-        return 0d;
+        return type.getSimilarity(token);
     }
 
     private StochasticProcess<Tuple<Sensor, Motor>, Sensor> getType(StochasticProcess<Tuple<Sensor, Motor>, Sensor> token) {
@@ -63,7 +69,7 @@ public class EvertedHierarchy<Sensor, Motor> {
             if (this.thisModel.getFrequency(this.lastCause, typeId) < this.thisModel.getMaxFrequency(this.lastCause)) {
                 Tuple<Integer, Tuple<Sensor, Motor>> action = new Tuple<>(typeId, motor);
                 if (this.parent == null) {
-                    this.parent = new EvertedHierarchy<>();
+                    this.parent = new EvertedHierarchy<>(this.threshold, this.level + 1);
                 }
                 this.thisModel = this.parent.getNextModel(this.thisObs, action);
                 this.thisModel.add(this.thisObs);

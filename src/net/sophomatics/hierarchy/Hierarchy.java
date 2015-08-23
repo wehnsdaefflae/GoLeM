@@ -85,7 +85,7 @@ public class Hierarchy<Sensor, Motor> {
 
         float thisValue, bestValue = this.threshold;
         for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
-            thisValue = eachModel.getMatch(this.tempModel);
+            thisValue = eachModel.getSimilarity(this.tempModel);
             if (thisValue >= bestValue) {
                 bestModel = eachModel;
                 bestValue = thisValue;
@@ -135,7 +135,7 @@ public class Hierarchy<Sensor, Motor> {
                 int bestId = this.parent.predict(this.currentModel.getId(), cause);
                 thisModel = this.mFak.get(bestId);
 
-                float sim = thisModel.getMatch(this.tempModel);
+                float sim = thisModel.getSimilarity(this.tempModel);
                 if (sim < this.threshold) {
                     thisModel = this.findModel();
                 }
@@ -167,7 +167,7 @@ public class Hierarchy<Sensor, Motor> {
         }
         int id0 = (Integer) s0;
         int id1 = (Integer) s1;
-        return this.mFak.get(id0).getMatch(this.mFak.get(id1));
+        return this.mFak.get(id0).getSimilarity(this.mFak.get(id1));
     }
 
     private void sensorUpdateStateProbability(Sensor observation) {

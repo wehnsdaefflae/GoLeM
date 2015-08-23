@@ -137,10 +137,10 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
     }
 
     @Override
-    public float getMatch(StochasticProcess<Condition, Consequence> other) {
+    public float getSimilarity(StochasticProcess<Condition, Consequence> other) {
         return this.getCosineSimilarity(other);
         //return this.getLikelihood(other);
-        //return this.getVectorDistance(other);
+        //return this.getVectorCloseness(other);
         //return this.getDeviationQuotient(other);
     }
 
@@ -176,7 +176,7 @@ public class MatrixStochasticProcess<Condition, Consequence> extends Identifiabl
         return (float) ((cosineSimilarity + 1) / 2f);
     }
 
-    public float getVectorDistance(StochasticProcess<Condition, Consequence> other) {
+    public float getVectorCloseness(StochasticProcess<Condition, Consequence> other) {
         MatrixStochasticProcess<Condition, Consequence> cast = (MatrixStochasticProcess<Condition, Consequence>) other;
 
         Set<Condition> causes = new HashSet<>(this.matrix.keySet());

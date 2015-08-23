@@ -26,7 +26,7 @@ public interface StochasticProcess<Condition, Consequence> {
 
     Consequence getEffect(Condition cause);
 
-    float getMatch(StochasticProcess<Condition, Consequence> other);
+    float getSimilarity(StochasticProcess<Condition, Consequence> other);
 
     void add(StochasticProcess<Condition, Consequence> other);
 
