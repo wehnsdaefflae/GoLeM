@@ -65,7 +65,7 @@ public class EvertedHierarchy<Sensor, Motor> {
     private StochasticProcess<Tuple<Sensor, Motor>, Sensor> getType(StochasticProcess<Tuple<Sensor, Motor>, Sensor> token) {
         double thisMatch, maxMatch = -1d;
         StochasticProcess<Tuple<Sensor, Motor>, Sensor> bestModel = null;
-        for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) {
+        for (StochasticProcess<Tuple<Sensor, Motor>, Sensor> eachModel : this.mFak) { // search only in parent model
             thisMatch = this.getMatch(token, eachModel);
             if (maxMatch < thisMatch) {
                 bestModel = eachModel;
